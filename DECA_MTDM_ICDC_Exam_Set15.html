@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DECA MTDM ICDC — Practice Exam Set 15</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f7f6f2;
+    color: #1f1f1f;
+    line-height: 1.6;
+    padding: 20px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .container { max-width: 840px; margin: 0 auto; }
+  .header {
+    background: #fff;
+    border: 1px solid #e5e3dc;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header h1 { font-size: 18px; font-weight: 500; color: #1f1f1f; }
+  .header p { font-size: 13px; color: #6b6b68; margin-top: 4px; }
+  .timer-box {
+    background: #fff;
+    border: 1px solid #e5e3dc;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #185FA5;
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-bar-bg {
+    height: 8px;
+    background: #fff;
+    border: 1px solid #e5e3dc;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: #185FA5;
+    transition: width 0.3s;
+  }
+  .start-screen, .exam-screen, .score-screen { display: none; }
+  .active { display: block; }
+  .start-card {
+    background: #fff;
+    border: 1px solid #e5e3dc;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+  }
+  .start-card h2 { font-size: 24px; margin-bottom: 12px; font-weight: 500; }
+  .start-card p { color: #6b6b68; margin-bottom: 8px; max-width: 500px; margin-left: auto; margin-right: auto; }
+  .mode-toggle {
+    display:inline-flex; gap:8px; margin:16px 0 8px; padding:4px;
+    background:#f7f6f2; border-radius:8px;
+  }
+  .mode-btn {
+    padding:8px 16px; font-size:13px; font-family:inherit; border:none;
+    background:transparent; color:#6b6b68; border-radius:6px; cursor:pointer; font-weight:500;
+  }
+  .mode-btn.active { background:#fff; color:#185FA5; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .mode-desc { font-size:12px; color:#6b6b68; margin-top:6px; }
+  .start-card .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 28px 0;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .stat { background: #f7f6f2; border-radius: 8px; padding: 14px; }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #6b6b68; margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 500; color: #185FA5; }
+  .q-card {
+    background: #fff;
+    border: 1px solid #e5e3dc;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .q-meta {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b6b68;
+    margin-bottom: 10px;
+  }
+  .q-text {
+    font-size: 16px;
+    color: #1f1f1f;
+    margin-bottom: 18px;
+    line-height: 1.6;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid #e5e3dc;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.15s;
+  }
+  .opt:hover { background: #f7f6f2; }
+  .opt.selected { border-color: #185FA5; background: #E6F1FB; }
+  .opt.correct { border-color: #3B6D11; background: #EAF3DE; }
+  .opt.wrong { border-color: #A32D2D; background: #FCEBEB; }
+  .opt.locked { cursor: default; }
+  .opt-letter { font-weight: 500; color: #6b6b68; min-width: 20px; }
+  .opt.correct .opt-letter { color: #3B6D11; }
+  .opt.wrong .opt-letter { color: #A32D2D; }
+  .opt-text { flex: 1; font-size: 15px; }
+  .explanation {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #f7f6f2;
+    border-left: 3px solid #185FA5;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.6;
+  }
+  .instant-verdict {
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .instant-verdict.correct {
+    background: #EAF3DE;
+    color: #3B6D11;
+    border: 1px solid #8ab559;
+  }
+  .instant-verdict.wrong {
+    background: #FCEBEB;
+    color: #A32D2D;
+    border: 1px solid #E8A0A0;
+  }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 22px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid #d5d2ca;
+    background: #fff;
+    color: #1f1f1f;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .btn:hover:not(:disabled) { background: #f7f6f2; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.primary { background: #185FA5; color: #fff; border-color: #185FA5; }
+  .btn.primary:hover:not(:disabled) { background: #0C447C; }
+  .q-counter { font-size: 13px; color: #6b6b68; }
+  .running-score { font-size: 13px; color: #6b6b68; margin-left:12px; }
+  .running-score strong { color: #185FA5; }
+  .jump-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+    margin-top: 16px;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid #e5e3dc;
+    border-radius: 8px;
+  }
+  .jump-btn {
+    padding: 6px 0;
+    font-size: 11px;
+    border: 1px solid #e5e3dc;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    color: #6b6b68;
+  }
+  .jump-btn.answered { background: #E6F1FB; color: #185FA5; border-color: #9BC2E9; }
+  .jump-btn.current { background: #185FA5; color: #fff; border-color: #185FA5; font-weight: 500; }
+  .jump-btn.correct-after { background: #EAF3DE; color: #3B6D11; border-color: #8ab559; }
+  .jump-btn.wrong-after { background: #FCEBEB; color: #A32D2D; border-color: #E8A0A0; }
+  .score-card {
+    background: #fff;
+    border: 1px solid #e5e3dc;
+    border-radius: 12px;
+    padding: 36px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .score-big { font-size: 64px; font-weight: 500; color: #185FA5; line-height: 1; margin-bottom: 6px; }
+  .score-label { font-size: 15px; color: #6b6b68; margin-bottom: 18px; }
+  .grade-band {
+    display: inline-block;
+    padding: 8px 22px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .bd-item { background: #f7f6f2; border-radius: 8px; padding: 12px; text-align: center; }
+  .bd-label { font-size: 11px; color: #6b6b68; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .bd-val { font-size: 20px; font-weight: 500; color: #1f1f1f; }
+  .area-breakdown {
+    background: #fff;
+    border: 1px solid #e5e3dc;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  .area-breakdown h3 { font-size: 16px; font-weight: 500; margin-bottom: 14px; }
+  .area-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eeece4;
+    font-size: 14px;
+  }
+  .area-row:last-child { border-bottom: none; }
+  .area-name { color: #1f1f1f; font-weight: 400; }
+  .area-right { display: flex; align-items: center; gap: 10px; }
+  .pill { padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  .pill-good { background: #EAF3DE; color: #3B6D11; }
+  .pill-ok { background: #E6F1FB; color: #185FA5; }
+  .pill-warn { background: #FAEEDA; color: #854F0B; }
+  .pill-bad { background: #FCEBEB; color: #A32D2D; }
+  .action-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  @media (max-width: 640px) {
+    .breakdown-grid { grid-template-columns: repeat(2, 1fr); }
+    .jump-grid { grid-template-columns: repeat(5, 1fr); }
+    .q-text { font-size: 15px; }
+    .start-card { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <a href="index.html" style="text-decoration:none; color:#6b6b68; font-size:13px; display:flex; align-items:center; gap:4px; margin-bottom:12px; width:100%"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> Back to Hub</a>
+    <div>
+      <h1>DECA MTDM — ICDC Practice Exam</h1>
+      <p>Set 15 · 100 questions · 1,500 total · Study/Exam mode toggle</p>
+    </div>
+    <div class="timer-box" id="timer">00:00</div>
+  </div>
+
+  <div id="start-screen" class="start-screen active">
+    <div class="start-card">
+      <h2>Ready for Set 15?</h2>
+      <p>100 fresh questions across all 17 areas. Zero overlap with Sets 1–14. Pick your practice mode below:</p>
+
+      <div class="mode-toggle" role="tablist">
+        <button class="mode-btn active" id="mode-exam-btn" onclick="setMode('exam')">Exam mode</button>
+        <button class="mode-btn" id="mode-study-btn" onclick="setMode('study')">Study mode</button>
+      </div>
+      <div class="mode-desc" id="mode-desc">Answers revealed only at the end — matches real ICDC format.</div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Questions</div><div class="stat-val">100</div></div>
+        <div class="stat"><div class="stat-label">Areas</div><div class="stat-val">17</div></div>
+        <div class="stat"><div class="stat-label">Suggested time</div><div class="stat-val">72m</div></div>
+      </div>
+      <button class="btn primary" onclick="startExam()" style="font-size:15px;padding:12px 28px">Start →</button>
+    </div>
+  </div>
+
+  <div id="exam-screen" class="exam-screen">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress" style="width:1%"></div></div>
+    <div id="q-container"></div>
+    <div class="nav">
+      <div>
+        <span class="q-counter" id="q-counter">Question 1 of 100</span>
+        <span class="running-score" id="running-score"></span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="btn-prev" onclick="nav(-1)" disabled>← Prev</button>
+        <button class="btn primary" id="btn-next" onclick="nav(1)">Next →</button>
+        <button class="btn primary" id="btn-submit" onclick="submitExam()" style="display:none">Submit exam</button>
+      </div>
+    </div>
+    <div class="jump-grid" id="jump-grid"></div>
+  </div>
+
+  <div id="score-screen" class="score-screen">
+    <div class="score-card">
+      <div style="font-size:13px;color:#6b6b68;margin-bottom:6px">Your score</div>
+      <div class="score-big" id="pct-display">—</div>
+      <div class="score-label" id="raw-display">— / 100 correct</div>
+      <div id="grade-band-el" class="grade-band"></div>
+      <div class="breakdown-grid">
+        <div class="bd-item"><div class="bd-label">Correct</div><div class="bd-val" id="s-correct">—</div></div>
+        <div class="bd-item"><div class="bd-label">Incorrect</div><div class="bd-val" id="s-wrong">—</div></div>
+        <div class="bd-item"><div class="bd-label">Time</div><div class="bd-val" id="s-time" style="font-size:16px">—</div></div>
+        <div class="bd-item"><div class="bd-label">Pace</div><div class="bd-val" id="s-pace" style="font-size:16px">—</div></div>
+      </div>
+    </div>
+
+    <div class="area-breakdown">
+      <h3>Score by instructional area</h3>
+      <div id="area-breakdown"></div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn primary" onclick="reviewMode()">Review all answers</button>
+      <button class="btn" onclick="location.reload()">Retake exam</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  // ===== MARKETING-INFORMATION MANAGEMENT (16) =====
+  {area:"Marketing-Information Management",q:"A 'causal inference' study tries to establish:",opts:["That one variable actually causes another, not just that they correlate","Only correlation","Only description","Only summaries"],ans:0,exp:"Causal inference moves beyond correlation to causation — using experimental designs, quasi-experiments, or causal models to identify what truly drives outcomes."},
+  {area:"Marketing-Information Management",q:"A company's 'experimentation culture' values:",opts:["Testing assumptions with evidence rather than relying solely on opinion or intuition","Intuition over evidence","Avoiding all tests","Copying competitors"],ans:0,exp:"Experimentation cultures treat major decisions as testable hypotheses — A/B testing, MVP pilots, holdout tests — rather than betting on untested assumptions."},
+  {area:"Marketing-Information Management",q:"A research question that is 'operationalized' means:",opts:["Defined concretely enough that it can actually be measured and answered","Kept abstract forever","Left vague","Made impossible"],ans:0,exp:"Operationalizing research questions converts abstract ideas into concrete, measurable variables — the step that makes a question answerable."},
+  {area:"Marketing-Information Management",q:"A 'sampling frame' is:",opts:["The actual list or source from which the sample is drawn","The entire world","A picture frame","The research deadline"],ans:0,exp:"Sampling frames are the operational lists (customer databases, panels, directories) from which samples are drawn. Gaps between frame and target population cause coverage error."},
+  {area:"Marketing-Information Management",q:"Which of the following BEST describes 'design research'?",opts:["Research focused on informing design decisions through user understanding and iterative testing","Only aesthetic research","Only financial research","Random data gathering"],ans:0,exp:"Design research (informing product/service design) combines user understanding, generative methods, and evaluative testing to shape design decisions."},
+  {area:"Marketing-Information Management",q:"A 'qualitative coding' step in analysis involves:",opts:["Tagging pieces of text with category labels to identify themes and patterns","Writing computer code","Random numbers","Pure quantitative stats"],ans:0,exp:"Qualitative coding systematically tags text (interview transcripts, open responses) with category labels — enabling theme identification and pattern detection."},
+  {area:"Marketing-Information Management",q:"A 'panel attrition' problem means:",opts:["Panelists dropping out over time, potentially biasing results if leavers differ from stayers","Adding too many panelists","Perfect retention","Zero panelists"],ans:0,exp:"Attrition: panel members leaving over time. Problematic if leavers differ systematically from stayers — weighting or backfilling can partially compensate."},
+  {area:"Marketing-Information Management",q:"A 'semantic differential' scale uses:",opts:["Pairs of bipolar adjectives (e.g., cheap–expensive) to rate a concept","Only one word","Only numbers","Only dates"],ans:0,exp:"Semantic differential scales present bipolar adjective pairs (hot–cold, modern–traditional) on a 5 or 7-point scale — capturing perceptual dimensions of brands and products."},
+  {area:"Marketing-Information Management",q:"A 'personalization index' might track:",opts:["The degree to which customer experiences are tailored using personal data","Only competitor prices","Only employee hours","Only weather"],ans:0,exp:"Personalization indices measure how much of the customer experience adapts to individuals — informed by data, enabled by automation, aligned with privacy."},
+  {area:"Marketing-Information Management",q:"A 'customer segmentation' refresh every 2–3 years is often needed because:",opts:["Customer needs, behaviors, and context shift over time as markets and technology evolve","Segments never change","Original research is always perfect","Once done, segmentation is final"],ans:0,exp:"Segmentations age as markets and behaviors shift. Periodic refreshes (2–3 years) keep the segmentation aligned with current reality."},
+  {area:"Marketing-Information Management",q:"A research report 'executive summary' should typically:",opts:["Convey the key findings and implications in one page, for readers who won't read the full report","Be longer than the report","Hide findings","Have no conclusions"],ans:0,exp:"Executive summaries give time-constrained readers the essentials — findings, implications, recommendations — in one page, with detail available in the full report."},
+  {area:"Marketing-Information Management",q:"A company measuring 'Customer Acquisition Cost Payback' tracks:",opts:["How long it takes gross profit from a new customer to recover the cost of acquiring them","Total revenue","Lifetime value","Employee count"],ans:0,exp:"CAC payback = months of gross profit to recover CAC. Shorter payback (e.g., <12 months) signals healthy unit economics and capital efficiency."},
+  {area:"Marketing-Information Management",q:"A 'funnel analysis' helps identify:",opts:["Where users drop off in a multi-step process and opportunities to improve conversion","Final sales only","Total profit","Employee morale"],ans:0,exp:"Funnel analysis surfaces drop-off points — revealing friction that's costing conversions and where investment in UX or messaging could lift results."},
+  {area:"Marketing-Information Management",q:"A researcher's 'researcher's disclosure' in a published study typically:",opts:["States funding sources, affiliations, and potential conflicts of interest","Hides all context","Withholds all information","Only names the researcher"],ans:0,exp:"Disclosures (funding, affiliations, conflicts) let readers assess potential bias. Transparency is foundational to research credibility."},
+  {area:"Marketing-Information Management",q:"A 'market sizing' typically uses two approaches:",opts:["Top-down (starting from large market totals) and bottom-up (building from customer-level estimates)","Only one approach","Only random methods","Only competitor data"],ans:0,exp:"Triangulating top-down and bottom-up approaches builds confidence in market size estimates — each method exposes assumptions the other might miss."},
+  {area:"Marketing-Information Management",q:"A 'data lineage' in analytics documents:",opts:["Where data comes from, how it's transformed, and how it flows to downstream reports","Only final results","Only one system","Only the data's age"],ans:0,exp:"Data lineage traces flows from sources through transformations to reports — essential for trust, debugging, compliance, and impact analysis."},
+
+  // ===== PRODUCT/SERVICE MANAGEMENT (15) =====
+  {area:"Product/Service Management",q:"A 'product hierarchy' for a brand like Coca-Cola includes:",opts:["Parent brand → family brands → product variants → SKUs (sizes, packs)","Only one level","Only SKUs","Only the logo"],ans:0,exp:"Product hierarchies organize the portfolio — parent brand (Coca-Cola) → family brands (Classic, Zero) → variants (flavors) → SKUs (sizes, packs)."},
+  {area:"Product/Service Management",q:"A 'total addressable market' (TAM) is LESS useful alone than combined with:",opts:["SAM (serviceable available) and SOM (serviceable obtainable) for realistic opportunity sizing","Only TAM","Only competitor revenue","Only ad spend"],ans:0,exp:"TAM-SAM-SOM: TAM (total), SAM (the subset you could realistically serve), SOM (the subset you can realistically capture). Together, they give realistic sizing."},
+  {area:"Product/Service Management",q:"A 'service blueprint' differs from a customer journey map by also documenting:",opts:["Frontstage and backstage processes, systems, and handoffs that enable the experience","Only the customer's side","Only marketing","Only advertising"],ans:0,exp:"Service blueprints add the behind-the-scenes view — frontstage (customer-facing), backstage (employees), support processes, systems — enabling operational improvements."},
+  {area:"Product/Service Management",q:"A 'design sprint' (Google Ventures) typically runs:",opts:["Five days, taking a team from problem to tested prototype","One year","One hour","Never ends"],ans:0,exp:"Design sprints compress product discovery into five days: Monday (understand), Tuesday (sketch), Wednesday (decide), Thursday (prototype), Friday (test with users)."},
+  {area:"Product/Service Management",q:"A 'product portfolio review' typically:",opts:["Evaluates each product's performance, strategic fit, and investment level quarterly or annually","Happens once ever","Ignores performance","Only looks at competitors"],ans:0,exp:"Portfolio reviews assess each product's health and strategic role — guiding investment, maintenance, or sunsetting decisions across the portfolio."},
+  {area:"Product/Service Management",q:"A 'product management triad' typically includes:",opts:["Product, design, and engineering working together as co-equal partners","Only the CEO","Only sales","Only marketing"],ans:0,exp:"The PM triad (PM + designer + tech lead) co-leads product teams — each bringing distinct expertise (user value, user experience, feasibility)."},
+  {area:"Product/Service Management",q:"A 'staged product launch' strategy:",opts:["Rolls out the product to progressively larger audiences, learning and adjusting at each stage","Launches to everyone immediately","Never launches","Only tests once"],ans:0,exp:"Staged launches (alpha, beta, limited release, general availability) reduce risk and build learning into the launch — common in software and mature enterprises."},
+  {area:"Product/Service Management",q:"A 'competitive moat' in product strategy refers to:",opts:["Durable advantages that protect the business from competitors (network effects, scale, brand, switching costs)","A literal water feature","A legal document","A marketing slogan"],ans:0,exp:"Moats (Buffett/Munger popularized) are durable advantages — network effects, scale economies, switching costs, brand, proprietary tech — protecting returns over time."},
+  {area:"Product/Service Management",q:"A product's 'power user' segment typically:",opts:["Uses the product intensely, provides disproportionate feedback, and drives WOM","Barely uses the product","Is silent","Doesn't exist"],ans:0,exp:"Power users drive disproportionate engagement, feedback, and advocacy — valuable for PM input though not always representative of the broader user base."},
+  {area:"Product/Service Management",q:"A company with a 'flywheel' growth model:",opts:["Creates self-reinforcing loops where each customer success feeds subsequent growth","Pushes one-time efforts","Has no repeat growth","Ignores customers"],ans:0,exp:"Flywheels (Jim Collins, Amazon) turn on compounding — better product → more customers → more data → better product → more customers. Slow to start, hard to stop."},
+  {area:"Product/Service Management",q:"A 'product release notes' document typically:",opts:["Summarizes new features, fixes, and changes in each release for users and teams","Hides all changes","Lists only bugs","Ignores users"],ans:0,exp:"Release notes communicate what's new — features, improvements, fixes — to customers and internal teams. Transparency builds trust and helps adoption."},
+  {area:"Product/Service Management",q:"A company's 'time to market' is often critical because:",opts:["Delays can mean lost opportunity, competitor first-mover advantage, or missed market windows","Speed doesn't matter","Only careful slow work counts","Speed always hurts quality"],ans:0,exp:"Time to market matters — delays cede opportunity to competitors, miss market windows, or let customer context shift. Balance with quality, not traded for it."},
+  {area:"Product/Service Management",q:"A 'product's 'performance tier' structure often uses:",opts:["Good / Better / Best to offer trade-up paths and capture different willingness-to-pay","Only one version","Only premium","Random pricing"],ans:0,exp:"Good/Better/Best tiers segment willingness-to-pay — serving budget buyers, mid-market, and premium, while anchoring perceived value and encouraging trade-up."},
+  {area:"Product/Service Management",q:"A 'product strategy' should be durable enough that:",opts:["It survives quarterly priority shifts while adapting to real learning","It changes every week","It never changes regardless of evidence","It's never articulated"],ans:0,exp:"Good product strategy sets durable direction while adapting to evidence. Constantly whipsawing strategy prevents execution; frozen strategy ignores reality."},
+  {area:"Product/Service Management",q:"A product's 'customer education' function:",opts:["Helps users learn how to get the most value from the product (tutorials, docs, training)","Hides knowledge","Ignores customers","Only sends bills"],ans:0,exp:"Customer education (docs, tutorials, academies, webinars) accelerates adoption and value realization — reducing support load and increasing retention."},
+
+  // ===== PROMOTION (13) =====
+  {area:"Promotion",q:"A campaign's CPM is $8 and it generates 2M impressions. Total ad spend is:",opts:["$160","$1,600","$16,000","$160,000"],ans:2,exp:"Spend = (Impressions ÷ 1,000) × CPM = (2,000,000 ÷ 1,000) × $8 = 2,000 × $8 = $16,000."},
+  {area:"Promotion",q:"'Brand salience' refers to:",opts:["How readily a brand comes to mind in relevant buying situations","Brand logo design","Brand color palette","Brand office locations"],ans:0,exp:"Brand salience (Byron Sharp) = mental availability — how often and easily a brand comes to mind in purchase situations. Strongly predicts market share."},
+  {area:"Promotion",q:"A 'category entry point' (CEP) refers to:",opts:["A buying situation or need that can lead a consumer to think about the category","Entering an industry legally","Starting a new firm","Opening a store"],ans:0,exp:"CEPs (Ehrenberg-Bass) are the buying contexts and needs that trigger category thought. Brands win by being linked to many CEPs (when thirsty, at a restaurant, at a party, etc.)."},
+  {area:"Promotion",q:"Which of the following is the PRIMARY reason marketers use 'A/B testing' on ads?",opts:["To empirically identify which variants perform better, informing optimization decisions","To confuse customers","To increase costs","To avoid data"],ans:0,exp:"A/B testing isolates causal performance differences between variants — enabling continuous, evidence-based improvement rather than opinion-based debates."},
+  {area:"Promotion",q:"A 'content flywheel' strategy:",opts:["Reuses, repurposes, and builds on content across formats and channels over time","Creates each piece once then discards","Avoids all content","Only uses one format"],ans:0,exp:"Content flywheels maximize ROI by repurposing — one long-form piece becomes clips, posts, threads, infographics — extending reach without equal production cost."},
+  {area:"Promotion",q:"An 'earned media' coverage win is typically:",opts:["A news article, podcast mention, or organic social share not paid for by the brand","A purchased ad","A competitor's statement","Paid sponsorship"],ans:0,exp:"Earned media (press coverage, podcast mentions, organic social sharing) is earned through newsworthiness — often considered more credible than paid media."},
+  {area:"Promotion",q:"A 'brand architecture' defines:",opts:["How a company's brands relate to one another (master brand, sub-brands, endorsed brands, house of brands)","Only the logo","Employee seating","Office architecture"],ans:0,exp:"Brand architectures organize portfolios — master brand (Apple), sub-brands (iPhone), endorsed brands (Polo Ralph Lauren), or house of brands (P&G: Tide, Crest, Pampers)."},
+  {area:"Promotion",q:"'Sequential messaging' in advertising:",opts:["Shows different messages in sequence as the audience progresses through their journey","Shows the same message forever","Uses no messaging","Ignores the journey"],ans:0,exp:"Sequential messaging adapts creative to where the consumer is (awareness → consideration → decision) — matching the right message to the right journey stage."},
+  {area:"Promotion",q:"A 'marketing mix modeling' (MMM) statistical approach:",opts:["Quantifies the contribution of each marketing channel to outcomes, informing budget allocation","Uses only one channel","Ignores all data","Copies competitor budgets"],ans:0,exp:"MMM uses econometric regression on historical data to estimate each channel's contribution to sales — informing budget allocation across channels."},
+  {area:"Promotion",q:"A 'landing page' in digital campaigns should typically:",opts:["Match the ad's message, reduce distractions, and guide visitors to a specific conversion action","Offer every product at once","Contain no call-to-action","Hide the offer"],ans:0,exp:"Effective landing pages align with the ad (message match), minimize distractions, and drive a single conversion action — boosting conversion rates."},
+  {area:"Promotion",q:"A 'creator brief' for an influencer campaign typically:",opts:["Sets expectations, key messages, must-include elements, and boundaries while leaving creative freedom","Scripts every word","Allows no direction","Has no brand goals"],ans:0,exp:"Creator briefs balance guidance (goals, messages, requirements, boundaries) with creative freedom — creators perform best when they can speak authentically to their audience."},
+  {area:"Promotion",q:"A 'pulse' marketing schedule:",opts:["Alternates periods of activity and lower activity based on demand or seasonality","Runs constantly at one level","Never runs","Only runs once"],ans:0,exp:"Pulsing (a form of flighting) modulates intensity — bursts of activity followed by lower-level presence — balancing budget efficiency with continuity."},
+  {area:"Promotion",q:"'Attribution' in marketing addresses:",opts:["How to allocate credit for a conversion across touchpoints that influenced it","Only the last click","Only the first impression","Random assignment"],ans:0,exp:"Attribution models (last-click, first-touch, linear, time-decay, data-driven) allocate conversion credit across touchpoints — informing channel investment decisions."},
+
+  // ===== SELLING (8) =====
+  {area:"Selling",q:"A sales 'qualified opportunity' has typically been evaluated on:",opts:["Fit, need, budget, authority, timeline, and prospect engagement","Only name and email","Only the first call","Random criteria"],ans:0,exp:"Qualification frameworks (BANT, MEDDIC, SPICED) evaluate fit, need, budget, authority, timeline, and engagement to separate real opportunities from noise."},
+  {area:"Selling",q:"A 'win-loss analysis' interviews:",opts:["Recent winners and losers of deals to surface patterns that can improve win rates","Only winners","Only losers","Only competitors"],ans:0,exp:"Win-loss interviews capture why deals were won or lost — competitor choices, messaging gaps, process issues — informing sales, product, and marketing."},
+  {area:"Selling",q:"A 'quota capacity' planning exercise calculates:",opts:["The number of reps needed based on quota and expected productivity per rep","Random numbers","Competitor headcount","Only the CEO's schedule"],ans:0,exp:"Quota capacity planning sizes the sales team — revenue target ÷ expected productivity per rep = rep count needed. Informs hiring plans."},
+  {area:"Selling",q:"A rep earns base $5,500/month + 5% on first $25,000 above base goal, 8% above $25k. On $45k over goal:",opts:["$1,250","$2,850","$3,600","$3,700"],ans:1,exp:"First tier: 25,000 × 0.05 = $1,250. Above: 20,000 × 0.08 = $1,600. Total variable = $2,850."},
+  {area:"Selling",q:"A 'closing ratio' of 20% means:",opts:["1 in 5 qualified opportunities converts to a closed-won deal","Every deal closes","No deals close","All leads convert"],ans:0,exp:"Closing ratio (win rate) = closed-won ÷ opportunities × 100. 20% means 1 in 5 qualified opportunities wins — common in B2B enterprise sales."},
+  {area:"Selling",q:"A 'reference selling' approach:",opts:["Uses existing customer references to build credibility and reduce risk for prospects","Hides all customer names","Uses only product specs","Relies only on ads"],ans:0,exp:"References are among the strongest trust-builders in B2B — relevant existing customers talking to prospects about real outcomes and experience."},
+  {area:"Selling",q:"A 'sales stage' in a pipeline typically represents:",opts:["A discrete stage of the buying process with defined entry/exit criteria","Random categorization","Only the first contact","Only the close"],ans:0,exp:"Sales stages (prospecting, qualification, proposal, negotiation, closed-won) structure the pipeline with clear criteria — enabling consistent tracking and forecasting."},
+  {area:"Selling",q:"A 'value selling' approach emphasizes:",opts:["Connecting the product's features to specific customer outcomes and value","Listing features only","Pushing discounts","Avoiding discussion"],ans:0,exp:"Value selling ties features → benefits → outcomes → value — helping customers see measurable impact. Moves conversations off price and onto outcomes."},
+
+  // ===== CHANNEL MANAGEMENT (7) =====
+  {area:"Channel Management",q:"A 'drop shipper' is a wholesaler that:",opts:["Ships products directly to the customer on behalf of the retailer, without physical retailer handling","Ships only to factories","Refuses all shipments","Only handles imports"],ans:0,exp:"Drop shippers fulfill orders directly to end customers — retailers sell without holding inventory. Common in e-commerce for long-tail or large items."},
+  {area:"Channel Management",q:"A 'trade promotion' by manufacturer to retailers includes:",opts:["Temporary allowances, volume incentives, or promotional support to drive retailer sales of a product","Ads to consumers","Internal training only","Employee promotions"],ans:0,exp:"Trade promotions (to retailers/distributors) — allowances, MDF, co-op, slotting — differ from consumer promotions (coupons, sweepstakes) aimed at end buyers."},
+  {area:"Channel Management",q:"A 'channel strategy shift' toward direct-to-consumer (DTC) often involves:",opts:["Selling direct via brand websites, stores, or apps, reducing intermediary dependence","Adding more intermediaries","Avoiding all consumers","Banning all stores"],ans:0,exp:"DTC shifts capture more margin, consumer data, and relationship control — at the cost of building direct logistics, marketing, and service capabilities."},
+  {area:"Channel Management",q:"A 'retail merchandiser' typically:",opts:["Ensures products are stocked, displayed, and priced correctly across stores","Only advertises","Only designs products","Only handles returns"],ans:0,exp:"Merchandisers (in-house or third-party) visit stores to ensure execution — stock levels, display compliance, pricing accuracy, promotional signage."},
+  {area:"Channel Management",q:"A 'just-in-case' inventory strategy emphasizes:",opts:["Holding safety stock to buffer against uncertainty — opposite of just-in-time","Zero inventory","Random inventory","Maximum efficiency"],ans:0,exp:"JIC strategies prioritize availability through safety stock — guarding against supply disruptions at the cost of higher inventory investment. Resurging post-COVID."},
+  {area:"Channel Management",q:"A manufacturer's 'territory exclusivity' agreement with a distributor means:",opts:["No other distributors in the territory will carry the manufacturer's product","Multiple competing distributors","No protection at all","Random assignment"],ans:0,exp:"Territory exclusivity gives distributors protected geography — incentivizing investment in the brand without competing with other authorized distributors."},
+  {area:"Channel Management",q:"A 'cross-docking' warehouse:",opts:["Receives and ships products quickly, often same-day, without long-term storage","Holds inventory for years","Never receives products","Only handles returns"],ans:0,exp:"Cross-docking moves products through the warehouse quickly — often within hours — reducing handling and inventory costs when flow and timing align well."},
+
+  // ===== EMOTIONAL INTELLIGENCE (6) =====
+  {area:"Emotional Intelligence",q:"A 'self-limiting belief' that hurts professional growth might sound like:",opts:["\"I'm not the kind of person who leads large projects\" despite evidence otherwise","Realistic boundaries","Accurate self-knowledge","Genuine skill gaps"],ans:0,exp:"Self-limiting beliefs (often unconscious) constrain what you attempt — distinct from accurate self-knowledge. Identifying and questioning them is a growth mindset practice."},
+  {area:"Emotional Intelligence",q:"A high-EI person navigating a change announcement typically:",opts:["Processes their own emotions, understands impact, and supports their team through transition","Pretends nothing changed","Only complains","Blames leadership loudly"],ans:0,exp:"Through change, high-EI professionals manage their own reactions, understand personal and team impact, and support others — becoming a stabilizing force."},
+  {area:"Emotional Intelligence",q:"A manager's 'empathic listening' with a struggling team member:",opts:["Listens to understand their experience before problem-solving or advising","Solves immediately","Ignores their experience","Only tells them what to do"],ans:0,exp:"Empathic listening prioritizes understanding over solving. People often need to feel heard before they can hear advice — and listening often surfaces better solutions anyway."},
+  {area:"Emotional Intelligence",q:"A 'gratitude' practice in professional life typically:",opts:["Reinforces positive relationships and builds resilience over time","Weakens relationships","Is unprofessional","Has no value"],ans:0,exp:"Expressing genuine, specific gratitude builds relationships and reinforces the kinds of behaviors you want more of — a small, compounding EI practice."},
+  {area:"Emotional Intelligence",q:"A person with strong 'interpersonal EI' can typically:",opts:["Read social situations, navigate diverse relationships, and influence others through trust","Ignore others","Only work alone","Force their way"],ans:0,exp:"Interpersonal EI = social awareness + relationship management — reading situations, building trust, adapting style, and influencing through authentic connection."},
+  {area:"Emotional Intelligence",q:"A team that 'overcommunicates' during uncertain times:",opts:["Usually reduces anxiety by filling information gaps that rumor would otherwise fill","Causes confusion","Increases anxiety","Is inefficient"],ans:0,exp:"In uncertain times, silence is filled with rumor and anxiety. Frequent, honest communication — even 'here's what we don't yet know' — reduces anxiety more than rare polished updates."},
+
+  // ===== MARKET PLANNING (5) =====
+  {area:"Market Planning",q:"A 'value proposition canvas' maps:",opts:["Customer jobs, pains, and gains to the product's pain relievers and gain creators","Only prices","Only costs","Only employees"],ans:0,exp:"Value Proposition Canvas (Osterwalder) maps customer jobs/pains/gains on one side, and the product's pain relievers/gain creators on the other — testing fit."},
+  {area:"Market Planning",q:"A 'positioning' shift for an established brand typically requires:",opts:["Strong justification, consistent rollout, and time for market perception to shift","No preparation","Instant change","Random timing"],ans:0,exp:"Repositioning established brands is risky — requires strong rationale, coordinated rollout, patience. Rushed or inconsistent repositions often confuse customers and lose share."},
+  {area:"Market Planning",q:"A 'minimum viable strategy' articulates:",opts:["The simplest coherent strategy that could succeed, testable and refinable as evidence emerges","The most complex possible","Zero strategy","Random plans"],ans:0,exp:"Minimum viable strategies are coherent enough to execute and learn from — more valuable than perfect strategies that never get tested in the market."},
+  {area:"Market Planning",q:"A 'beachhead market' strategy:",opts:["Dominates a narrow target segment first, then expands from that position of strength","Pursues all markets at once","Avoids all markets","Enters only luxury"],ans:0,exp:"Beachhead strategies (Moore's Crossing the Chasm) win a defensible niche first, then expand from strength — preventing the common mistake of spreading too thin."},
+  {area:"Market Planning",q:"A 'platform strategy' creates value when:",opts:["Network effects make the platform more valuable to each participant as more join","The platform loses users with growth","Zero participants join","It has no network"],ans:0,exp:"Platform value compounds with network effects — more users/developers/sellers make it more valuable to everyone. Strong platforms become winner-take-most markets."},
+
+  // ===== PROFESSIONAL DEVELOPMENT (5) =====
+  {area:"Professional Development",q:"A 'career lattice' (vs. career ladder) includes:",opts:["Lateral and diagonal moves, not just upward promotions, as valid career progression","Only vertical moves","Only downward moves","Only staying put"],ans:0,exp:"Career lattices embrace lateral moves, role changes, and cross-functional shifts as valid progression — broadening experience alongside or instead of vertical movement."},
+  {area:"Professional Development",q:"A 'professional development plan' (PDP) is MOST effective when:",opts:["Aligned with clear career goals, with specific actions, milestones, and regular review","Vague and unused","Written once forever","Only about salary"],ans:0,exp:"Strong PDPs tie learning to specific goals, with concrete actions, milestones, and periodic review — treating development as a managed project."},
+  {area:"Professional Development",q:"A 'skill stack' (Scott Adams) refers to:",opts:["The combination of multiple good-but-not-great skills that create unique value","Only one skill","Only top-tier skills","Random skills"],ans:0,exp:"Skill stacking combines several solid skills (e.g., analytics + writing + domain expertise) for unique market value — being in the top 25% at multiple things beats world-class at one for many roles."},
+  {area:"Professional Development",q:"A 'professional's 'adjacent skills' that complement their core are:",opts:["Related skills that enhance core work (e.g., writing and data literacy for most professionals)","Completely unrelated topics","Skills they'll never use","Skills already mastered"],ans:0,exp:"Adjacent skills complement your core — a data analyst learning to write, a writer learning data — amplifying impact through breadth alongside depth."},
+  {area:"Professional Development",q:"A 'sabbatical' from work:",opts:["Can offer rest, perspective, and learning opportunities valuable for long-term growth","Always hurts careers","Is wasted time","Has no value"],ans:0,exp:"Sabbaticals (formal or informal) allow rest, reflection, learning, or exploration — often returning people to work energized and with new perspective."},
+
+  // ===== ECONOMICS (4) =====
+  {area:"Economics",q:"A 'negative real interest rate' means:",opts:["Inflation is higher than the nominal interest rate, eroding the real value of savings","Inflation is lower than nominal rates","Interest rates are zero","Banks pay borrowers"],ans:0,exp:"Real rate = nominal rate − inflation. Negative real rates erode purchasing power of savings (cash loses value faster than interest earned) while favoring debtors."},
+  {area:"Economics",q:"'Stagflation' is the uncommon combination of:",opts:["High inflation AND high unemployment/stagnant growth","Low inflation and full employment","Only deflation","Only rapid growth"],ans:0,exp:"Stagflation (1970s) combines stagnation (low growth, high unemployment) with inflation — a policy nightmare since typical anti-inflation tools can worsen unemployment."},
+  {area:"Economics",q:"A 'tariff' is:",opts:["A tax imposed on imported goods","A tax on exports only","A subsidy","A transportation cost"],ans:0,exp:"Tariffs are taxes on imports — raising import prices, often to protect domestic industries or raise revenue. Can trigger retaliatory tariffs in trade disputes."},
+  {area:"Economics",q:"A 'consumer confidence index' (CCI) tracks:",opts:["How optimistic consumers feel about the economy and their personal finances","Only stock prices","Only unemployment","Only GDP"],ans:0,exp:"CCI measures consumer sentiment — influencing spending, major purchases, and savings behavior. Often leads changes in consumer spending and economic activity."},
+
+  // ===== FINANCIAL ANALYSIS (4) =====
+  {area:"Financial Analysis",q:"A company's 'debt-to-equity ratio' of 2.0 means:",opts:["It has $2 of debt for every $1 of equity — moderately to highly leveraged","It has no debt","It has $2 of equity per $1 debt","It's debt-free"],ans:0,exp:"D/E ratio = Total debt ÷ Total equity. 2.0 = $2 debt per $1 equity — moderate to high leverage depending on industry norms."},
+  {area:"Financial Analysis",q:"A company with $600,000 revenue, 25% gross margin, and $90,000 operating expenses has operating income of:",opts:["$60,000","$90,000","$150,000","$510,000"],ans:0,exp:"Gross profit = 600,000 × 0.25 = $150,000. Operating income = $150,000 − $90,000 = $60,000."},
+  {area:"Financial Analysis",q:"A 'gross profit margin' improvement from 35% to 40% at $2M revenue adds approximately:",opts:["$100,000 to gross profit","$1,000,000","$10,000","$5,000"],ans:0,exp:"Improvement = 5% × $2,000,000 = $100,000 in additional gross profit — assuming revenue stays flat."},
+  {area:"Financial Analysis",q:"A 'depreciation' expense represents:",opts:["Allocating the cost of a long-lived asset over its useful life","Cash paid today","Product returns","Bad debt"],ans:0,exp:"Depreciation spreads asset costs (equipment, buildings) over useful life — a non-cash expense on the income statement that reduces taxable income."},
+
+  // ===== OPERATIONS (4) =====
+  {area:"Operations",q:"A 'process capability index' (Cpk) measures:",opts:["How well a process meets specifications relative to its natural variation","Employee satisfaction","Marketing spend","Stock price"],ans:0,exp:"Cpk quantifies process capability — higher values (typically >1.33) indicate process output consistently fits within specification limits. A core Six Sigma metric."},
+  {area:"Operations",q:"A 'warehouse management system' (WMS) typically:",opts:["Orchestrates receiving, putaway, picking, packing, and shipping activities","Only handles sales","Only manages HR","Only tracks competitors"],ans:0,exp:"WMS software manages warehouse operations — guiding staff through receiving, storage, order picking, packing, and shipping efficiently and accurately."},
+  {area:"Operations",q:"A company's 'circular economy' approach aims to:",opts:["Eliminate waste by reusing, recycling, and regenerating materials rather than dispose-after-use","Maximize disposal","Avoid recycling","Only use new materials"],ans:0,exp:"Circular economy designs out waste — products designed for reuse, repair, refurbishment, recycling. A growing operational and sustainability imperative."},
+  {area:"Operations",q:"A 'line balancing' effort in production:",opts:["Distributes work across workstations so each takes similar time, reducing idle time and bottlenecks","Creates bottlenecks","Ignores cycle times","Overloads one station"],ans:0,exp:"Line balancing assigns tasks to workstations to match takt time — preventing bottlenecks at slow stations and idle time at fast stations. A lean fundamental."},
+
+  // ===== PRICING (4) =====
+  {area:"Pricing",q:"A company implementing 'dynamic pricing' via algorithms should:",opts:["Monitor perception, test pricing fences, and avoid surprising or alienating customers","Change prices constantly without regard","Hide all prices","Never change prices"],ans:0,exp:"Dynamic pricing works when perceived as fair and contextual — ride-sharing surge, airline pricing, hotels. Overt manipulation or surprise changes erode trust."},
+  {area:"Pricing",q:"A 'trial pricing' strategy (7-day free trial, $1 first month):",opts:["Lowers the barrier to experience the product, counting on conversion after trial","Raises the barrier","Hides the product","Is always free forever"],ans:0,exp:"Trial pricing reduces initial risk — letting customers experience the product before committing — relying on perceived value to drive conversion."},
+  {area:"Pricing",q:"A 'price fence' distinguishes between:",opts:["Different customer segments or purchase contexts to enable different prices without arbitrage","All customers identically","Only luxury buyers","Only one price globally"],ans:0,exp:"Price fences (student/senior discounts, membership tiers, advance purchase, geographic restrictions) separate segments so different prices can coexist without arbitrage."},
+  {area:"Pricing",q:"A product's 'price premium' over competitors is sustainable when:",opts:["Differentiated features, brand, or service justify it in customers' eyes","It's hidden","Random","Only at launch"],ans:0,exp:"Sustainable price premiums require sustained differentiation — customer-valued features, brand equity, service, or experience that rivals can't easily match."},
+
+  // ===== COMMUNICATIONS (3) =====
+  {area:"Communications",q:"A 'strategic narrative' for a company:",opts:["Articulates the 'why now' for the company's mission, opportunity, and role in the market","Only describes products","Lists competitors","Has no point"],ans:0,exp:"Strategic narratives (Andy Raskin) frame the 'why now' — the market change creating opportunity, and why this company is uniquely positioned — galvanizing customers, investors, and employees."},
+  {area:"Communications",q:"A 'Q&A document' (FAQ) serves to:",opts:["Anticipate common questions and provide clear, consistent answers","Hide information","Create confusion","Be incomplete"],ans:0,exp:"Q&A docs (internal and external) provide consistent, clear answers — scaling communication and ensuring everyone hears the same message."},
+  {area:"Communications",q:"A 'messaging framework' for a brand typically includes:",opts:["Positioning, key messages, proof points, and tone guidelines","Only random quotes","Only the logo","Only pricing"],ans:0,exp:"Messaging frameworks codify positioning, key messages, supporting proof points, and tone — enabling consistent communication across teams and channels."},
+
+  // ===== INFORMATION MANAGEMENT (3) =====
+  {area:"Information Management",q:"A 'data warehouse' differs from a 'data lake' in that warehouses:",opts:["Store structured, processed data for analytics; lakes store raw data of all types","Are identical","Are always smaller","Never contain data"],ans:0,exp:"Data warehouses store structured, cleaned data optimized for reporting and analytics. Data lakes store raw data (structured and unstructured) for flexible future use."},
+  {area:"Information Management",q:"'Multi-factor authentication' (MFA) adds security by requiring:",opts:["Two or more verification factors (password + code, biometric, or security key)","Only a password","No authentication","Random prompts"],ans:0,exp:"MFA combines factors: something you know (password), have (phone, security key), or are (biometric) — dramatically harder to compromise than passwords alone."},
+  {area:"Information Management",q:"A 'ransomware' attack:",opts:["Encrypts victim's data and demands payment (often crypto) for decryption","Only steals money","Cannot be prevented","Is always harmless"],ans:0,exp:"Ransomware encrypts systems/data and demands ransom for decryption. Prevention: backups, patching, endpoint protection, user training. Payment doesn't guarantee recovery."},
+
+  // ===== BUSINESS LAW (1) =====
+  {area:"Business Law",q:"A 'trademark infringement' case typically requires showing:",opts:["Likelihood of consumer confusion between the marks","Identical logos always","No similarity","Only intent to copy"],ans:0,exp:"Trademark infringement analysis focuses on 'likelihood of confusion' among consumers — not just similarity. Courts examine multiple factors to assess this risk."},
+
+  // ===== CUSTOMER RELATIONS (1) =====
+  {area:"Customer Relations",q:"A 'customer health score' typically combines:",opts:["Usage, engagement, support interactions, sentiment, and other signals into a predictive indicator of retention risk","Only one metric","Only revenue","Only survey results"],ans:0,exp:"Health scores aggregate signals — product usage, engagement depth, support volume, sentiment, renewal patterns — to predict retention risk and prioritize intervention."},
+
+  // ===== MARKETING (1) =====
+  {area:"Marketing",q:"'Societal marketing' (vs. marketing concept) extends to consider:",opts:["Not just customer needs but also society's long-term welfare","Only short-term sales","Only employee welfare","Only customer individual wants"],ans:0,exp:"Societal marketing (Kotler's extension) adds society's welfare to customer needs — considering environmental, social, and long-term impacts alongside immediate customer wants."}
+];
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let submitted = false;
+let mode = 'exam';
+let startTime = null;
+let endTime = null;
+let timerInterval = null;
+
+function setMode(m){
+  mode = m;
+  document.getElementById('mode-exam-btn').classList.toggle('active', m==='exam');
+  document.getElementById('mode-study-btn').classList.toggle('active', m==='study');
+  document.getElementById('mode-desc').textContent = m==='exam'
+    ? 'Answers revealed only at the end — matches real ICDC format.'
+    : 'See correct answer and explanation instantly after each question — best for learning.';
+}
+
+function startExam(){
+  document.getElementById('start-screen').classList.remove('active');
+  document.getElementById('exam-screen').classList.add('active');
+  startTime = Date.now();
+  timerInterval = setInterval(updateTimer, 1000);
+  render();
+  renderJumpGrid();
+}
+
+function updateTimer(){
+  if(!startTime || submitted) return;
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  document.getElementById('timer').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function render(){
+  const q = QUESTIONS[current];
+  const el = document.getElementById('q-container');
+  const answered = answers[current] !== null;
+  const showAnswer = submitted || (mode === 'study' && answered);
+  let html = `<div class="q-card">
+    <div class="q-meta">${q.area} · Question ${current+1} of ${QUESTIONS.length}</div>
+    <div class="q-text">${q.q}</div>
+    <div class="options">`;
+  q.opts.forEach((o, i) => {
+    let cls = 'opt';
+    if (showAnswer) {
+      cls += ' locked';
+      if (i === q.ans) cls += ' correct';
+      else if (i === answers[current] && answers[current] !== q.ans) cls += ' wrong';
+    } else if (answers[current] === i) {
+      cls += ' selected';
+    }
+    html += `<div class="${cls}" onclick="select(${i})">
+      <span class="opt-letter">${['A','B','C','D'][i]}</span>
+      <span class="opt-text">${o}</span>
+    </div>`;
+  });
+  html += `</div>`;
+  if (showAnswer) {
+    const wasCorrect = answers[current] === q.ans;
+    if (mode === 'study' && !submitted) {
+      html += `<div class="instant-verdict ${wasCorrect ? 'correct':'wrong'}">${wasCorrect ? '✓ Correct!' : `✗ Incorrect — correct answer: ${['A','B','C','D'][q.ans]}`}</div>`;
+    }
+    html += `<div class="explanation"><strong>Explanation:</strong> ${q.exp}</div>`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
+
+  document.getElementById('q-counter').textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+  if (mode === 'study' && !submitted) {
+    const answeredN = answers.filter(a => a !== null).length;
+    let correct = 0;
+    answers.forEach((a, i) => { if (a === QUESTIONS[i].ans) correct++; });
+    document.getElementById('running-score').innerHTML = answeredN > 0
+      ? `· Running: <strong>${correct}/${answeredN}</strong> (${Math.round(correct/answeredN*100)}%)`
+      : '';
+  } else {
+    document.getElementById('running-score').textContent = '';
+  }
+
+  document.getElementById('progress').style.width = ((current+1)/QUESTIONS.length*100).toFixed(1)+'%';
+  document.getElementById('btn-prev').disabled = current === 0;
+  const isLast = current === QUESTIONS.length - 1;
+  document.getElementById('btn-next').style.display = isLast ? 'none' : 'inline-block';
+  document.getElementById('btn-next').disabled = false;
+
+  const allDone = answers.every(a => a !== null);
+  document.getElementById('btn-submit').style.display = (isLast && !submitted) ? 'inline-block' : 'none';
+  if (isLast && !allDone && !submitted) {
+    document.getElementById('btn-submit').textContent = `Submit (${answers.filter(a=>a!==null).length}/${QUESTIONS.length} answered)`;
+  }
+  updateJumpGrid();
+}
+
+function select(i){
+  if (submitted) return;
+  if (mode === 'study' && answers[current] !== null) return;
+  answers[current] = i;
+  render();
+}
+
+function nav(d){
+  current = Math.max(0, Math.min(QUESTIONS.length-1, current+d));
+  render();
+}
+
+function jumpTo(i){ current = i; render(); }
+
+function renderJumpGrid(){
+  const grid = document.getElementById('jump-grid');
+  let html = '';
+  for (let i = 0; i < QUESTIONS.length; i++) {
+    html += `<button class="jump-btn" id="jmp-${i}" onclick="jumpTo(${i})">${i+1}</button>`;
+  }
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid(){
+  for (let i = 0; i < QUESTIONS.length; i++) {
+    const btn = document.getElementById('jmp-'+i);
+    if (!btn) continue;
+    btn.className = 'jump-btn';
+    if (submitted || (mode === 'study' && answers[i] !== null)) {
+      if (answers[i] === QUESTIONS[i].ans) btn.className += ' correct-after';
+      else if (answers[i] !== null) btn.className += ' wrong-after';
+    } else if (answers[i] !== null) {
+      btn.className += ' answered';
+    }
+    if (i === current) btn.className += ' current';
+  }
+}
+
+function submitExam(){
+  const unanswered = answers.filter(a=>a===null).length;
+  if (unanswered > 0) {
+    if (!confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+  }
+  submitted = true;
+  endTime = Date.now();
+  clearInterval(timerInterval);
+  showScore();
+}
+
+function showScore(){
+  document.getElementById('exam-screen').classList.remove('active');
+  document.getElementById('score-screen').classList.add('active');
+
+  let correct = 0;
+  const areaMap = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!areaMap[q.area]) areaMap[q.area] = {c:0, t:0};
+    areaMap[q.area].t++;
+    if (answers[i] === q.ans) { correct++; areaMap[q.area].c++; }
+  });
+
+  const pct = Math.round(correct / QUESTIONS.length * 100);
+  document.getElementById('pct-display').textContent = pct + '%';
+  document.getElementById('raw-display').textContent = `${correct} / ${QUESTIONS.length} correct`;
+
+  let band, bandStyle;
+  if (pct >= 85) { band = 'Excellent — ICDC competitive'; bandStyle = 'background:#EAF3DE;color:#3B6D11'; }
+  else if (pct >= 75) { band = 'Strong — on track for top placements'; bandStyle = 'background:#E6F1FB;color:#185FA5'; }
+  else if (pct >= 65) { band = 'Good — refine weak areas'; bandStyle = 'background:#E6F1FB;color:#185FA5'; }
+  else if (pct >= 55) { band = 'Needs work — focus on high-weight areas'; bandStyle = 'background:#FAEEDA;color:#854F0B'; }
+  else { band = 'Significant prep needed'; bandStyle = 'background:#FCEBEB;color:#A32D2D'; }
+
+  const gb = document.getElementById('grade-band-el');
+  gb.textContent = band;
+  gb.style.cssText = bandStyle + ';padding:8px 22px;border-radius:8px;font-size:15px;font-weight:500;margin-bottom:24px;display:inline-block';
+
+  document.getElementById('s-correct').textContent = correct;
+  document.getElementById('s-wrong').textContent = QUESTIONS.length - correct;
+
+  const totalSec = Math.floor((endTime - startTime)/1000);
+  const m = Math.floor(totalSec/60);
+  const s = totalSec % 60;
+  document.getElementById('s-time').textContent = `${m}m ${s}s`;
+  document.getElementById('s-pace').textContent = `${Math.round(totalSec / QUESTIONS.length)}s/q`;
+
+  let abd = '';
+  const sorted = Object.entries(areaMap).sort((a,b) => (b[1].c/b[1].t) - (a[1].c/a[1].t));
+  sorted.forEach(([a, v]) => {
+    const p = Math.round(v.c/v.t*100);
+    let pillCls;
+    if (p >= 80) pillCls = 'pill-good';
+    else if (p >= 65) pillCls = 'pill-ok';
+    else if (p >= 50) pillCls = 'pill-warn';
+    else pillCls = 'pill-bad';
+    abd += `<div class="area-row">
+      <span class="area-name">${a}</span>
+      <span class="area-right">
+        <span style="color:#6b6b68;font-size:13px">${v.c} / ${v.t}</span>
+        <span class="pill ${pillCls}">${p}%</span>
+      </span>
+    </div>`;
+  });
+  document.getElementById('area-breakdown').innerHTML = abd;
+
+const setNum = window.location.pathname.match(/Set(\d+)/)[1];
+  const bestKey = `deca_exam_set_${setNum}`;
+  const existing = localStorage.getItem(bestKey);
+  if (!existing || JSON.parse(existing).pct < pct) {
+    localStorage.setItem(bestKey, JSON.stringify({ pct: pct, date: new Date().toISOString() }));
+  }
+}
+
+function reviewMode(){
+  document.getElementById('score-screen').classList.remove('active');
+  document.getElementById('exam-screen').classList.add('active');
+  current = 0;
+  render();
+  updateJumpGrid();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
