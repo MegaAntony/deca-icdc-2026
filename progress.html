@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Progress – DECA 2026 ICDC</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f7f6f2;
+    color: #1f1f1f;
+    line-height: 1.6;
+    padding: 20px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 10px 0 60px; }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #6b6b68;
+    font-size: 13px;
+    text-decoration: none;
+    margin-bottom: 20px;
+  }
+  .back-link:hover { color: #185FA5; }
+
+  header { margin-bottom: 28px; }
+  header h1 { font-size: 26px; font-weight: 700; color: #185FA5; letter-spacing: -0.02em; margin-bottom: 4px; }
+  header p  { color: #6b6b68; font-size: 14px; }
+
+  /* Summary cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .summary-card {
+    background: #fff;
+    border: 1px solid #e5e3dc;
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .summary-card .s-val {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #1f1f1f;
+  }
+  .summary-card .s-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #6b6b68; margin-top: 4px; }
+  .summary-card.green .s-val { color: #3B6D11; }
+  .summary-card.blue  .s-val { color: #185FA5; }
+  .summary-card.red   .s-val { color: #A32D2D; }
+
+  /* Section heading */
+  .section-heading {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b6b68;
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e3dc;
+  }
+
+  /* Strength panels */
+  .panel-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .panel {
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .panel h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .panel ul  { list-style: none; }
+  .panel li  { font-size: 13px; padding: 3px 0; }
+  .panel-strong  { background: #EAF3DE; border: 1px solid #c3e6a8; }
+  .panel-strong h4 { color: #3B6D11; }
+  .panel-strong li { color: #3B6D11; }
+  .panel-improve { background: #FCEBEB; border: 1px solid #f5c0c0; }
+  .panel-improve h4 { color: #A32D2D; }
+  .panel-improve li { color: #A32D2D; }
+  .panel-muted { color: inherit; opacity: 0.6; font-size: 13px; }
+
+  /* Exam table */
+  .exam-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e3dc;
+    overflow: hidden;
+  }
+  .exam-table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b6b68;
+    padding: 10px 14px;
+    border-bottom: 2px solid #e5e3dc;
+    background: #f7f6f2;
+  }
+  .exam-table td { padding: 10px 14px; border-bottom: 1px solid #f0ede8; font-size: 14px; vertical-align: middle; }
+  .exam-table tr:last-child td { border-bottom: none; }
+  .exam-table tr:hover td { background: #faf9f7; }
+  .exam-table a { color: #185FA5; text-decoration: none; font-weight: 500; }
+  .exam-table a:hover { text-decoration: underline; }
+
+  /* Score pills */
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pill-great  { background: #EAF3DE; color: #3B6D11; }
+  .pill-good   { background: #E6F1FB; color: #185FA5; }
+  .pill-warn   { background: #FAEEDA; color: #854F0B; }
+  .pill-low    { background: #FCEBEB; color: #A32D2D; }
+  .pill-none   { background: #f0ede8; color: #6b6b68; }
+
+  /* Mini progress bar */
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar-bg   { flex: 1; height: 6px; background: #e5e3dc; border-radius: 20px; overflow: hidden; min-width: 50px; }
+  .bar-fill { height: 100%; border-radius: 20px; }
+  .bar-great { background: #3B6D11; }
+  .bar-good  { background: #185FA5; }
+  .bar-warn  { background: #854F0B; }
+  .bar-low   { background: #A32D2D; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 60px 20px; color: #6b6b68; }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 17px; color: #1f1f1f; margin-bottom: 8px; }
+  .empty-state p  { font-size: 14px; max-width: 340px; margin: 0 auto 20px; }
+
+  /* Buttons */
+  .btn-primary {
+    display: inline-block;
+    background: #185FA5;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-primary:hover { background: #0C447C; }
+  .btn-ghost {
+    display: inline-block;
+    background: #fff;
+    color: #6b6b68;
+    border: 1px solid #e5e3dc;
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-ghost:hover { border-color: #A32D2D; color: #A32D2D; }
+
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 36px; }
+
+  .footer { margin-top: 60px; text-align: center; font-size: 13px; color: #a0a09d; }
+
+  @media (max-width: 620px) {
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .panel-row    { grid-template-columns: 1fr; }
+    .exam-table th:nth-child(4),
+    .exam-table td:nth-child(4) { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a href="index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    Back to Hub
+  </a>
+
+  <header>
+    <h1>📊 My Progress</h1>
+    <p>DECA MTDM · 20 Exam Sets · Best scores saved in your browser</p>
+  </header>
+
+  <div id="progress-root"></div>
+
+  <div class="footer">&copy; 2026 DECA ICDC Preparation · Marketing Cluster</div>
+</div>
+
+<script>
+(function () {
+  var SETS = 20;
+
+  function pillClass(pct) {
+    if (pct >= 85) return 'pill-great';
+    if (pct >= 70) return 'pill-good';
+    if (pct >= 55) return 'pill-warn';
+    return 'pill-low';
+  }
+  function barClass(pct) {
+    if (pct >= 85) return 'bar-great';
+    if (pct >= 70) return 'bar-good';
+    if (pct >= 55) return 'bar-warn';
+    return 'bar-low';
+  }
+  function bandLabel(pct) {
+    if (pct >= 85) return '🏆 Excellent';
+    if (pct >= 70) return '⭐ Good';
+    if (pct >= 55) return '📖 Needs Work';
+    return '🙏 More Practice';
+  }
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  // Load all scores from localStorage
+  var scores = [];
+  for (var i = 1; i <= SETS; i++) {
+    var raw = localStorage.getItem('deca_exam_set_' + i);
+    if (raw) {
+      try {
+        var data = JSON.parse(raw);
+        scores.push({ set: i, pct: data.pct, date: data.date });
+      } catch (e) {}
+    }
+  }
+
+  var root = document.getElementById('progress-root');
+
+  if (scores.length === 0) {
+    root.innerHTML = '<div class="empty-state">'
+      + '<div class="icon">📋</div>'
+      + '<h3>No exams completed yet</h3>'
+      + '<p>Complete any exam set and your best score will appear here.</p>'
+      + '<a href="index.html" class="btn-primary">Start an Exam →</a>'
+      + '</div>';
+    return;
+  }
+
+  // Stats
+  var attempted   = scores.length;
+  var totalPct    = scores.reduce(function (s, r) { return s + r.pct; }, 0);
+  var avgPct      = Math.round(totalPct / attempted);
+  var atTarget    = scores.filter(function (r) { return r.pct >= 85; }).length;
+  var needsWork   = scores.filter(function (r) { return r.pct < 65; }).length;
+  var notAttempted = SETS - attempted;
+
+  var strong  = scores.filter(function (r) { return r.pct >= 85; });
+  var improve = scores.filter(function (r) { return r.pct < 65; });
+
+  var html = '';
+
+  // Summary cards
+  html += '<div class="summary-grid">'
+    + '<div class="summary-card blue"><div class="s-val">' + attempted + '<span style="font-size:14px;font-weight:400;color:#6b6b68;">/' + SETS + '</span></div><div class="s-lbl">Sets Attempted</div></div>'
+    + '<div class="summary-card ' + (avgPct >= 85 ? 'green' : avgPct >= 65 ? 'blue' : 'red') + '"><div class="s-val">' + avgPct + '%</div><div class="s-lbl">Average Score</div></div>'
+    + '<div class="summary-card green"><div class="s-val">' + atTarget + '</div><div class="s-lbl">At Target (85%+)</div></div>'
+    + '<div class="summary-card ' + (needsWork > 0 ? 'red' : '') + '"><div class="s-val">' + needsWork + '</div><div class="s-lbl">Needs Work (&lt;65%)</div></div>'
+    + '</div>';
+
+  // Strength panels
+  if (strong.length > 0 || improve.length > 0) {
+    html += '<div class="section-heading">Performance Analysis</div>';
+    html += '<div class="panel-row">';
+
+    html += '<div class="panel panel-strong">'
+      + '<h4>💪 Strong Sets (85%+)</h4>'
+      + (strong.length === 0
+        ? '<p class="panel-muted">Score 85%+ on any set to see it here.</p>'
+        : '<ul>' + strong.map(function (r) {
+            return '<li>✅ Set ' + r.set + ' — ' + r.pct + '%</li>';
+          }).join('') + '</ul>')
+      + '</div>';
+
+    html += '<div class="panel panel-improve">'
+      + '<h4>📖 Needs More Practice (&lt;65%)</h4>'
+      + (improve.length === 0
+        ? '<p class="panel-muted">Great — no sets below 65% yet!</p>'
+        : '<ul>' + improve.map(function (r) {
+            return '<li>⚠️ Set ' + r.set + ' — ' + r.pct + '%</li>';
+          }).join('') + '</ul>')
+      + '</div>';
+
+    html += '</div>';
+  }
+
+  // Exam table
+  html += '<div class="section-heading">All 20 Exam Sets</div>';
+  html += '<div style="overflow-x:auto;"><table class="exam-table"><thead><tr>'
+    + '<th>Set</th><th>Best Score</th><th>Rating</th><th>Date</th><th>Action</th>'
+    + '</tr></thead><tbody>';
+
+  for (var s = 1; s <= SETS; s++) {
+    var rec = null;
+    for (var k = 0; k < scores.length; k++) {
+      if (scores[k].set === s) { rec = scores[k]; break; }
+    }
+    if (rec) {
+      var bc = pillClass(rec.pct);
+      var brc = barClass(rec.pct);
+      html += '<tr>'
+        + '<td><a href="DECA_MTDM_ICDC_Exam_Set' + s + '.html">Set ' + s + '</a></td>'
+        + '<td><div class="bar-wrap">'
+        + '<div class="bar-bg"><div class="bar-fill ' + brc + '" style="width:' + rec.pct + '%"></div></div>'
+        + '<span style="font-weight:700;font-size:13px;min-width:34px;text-align:right">' + rec.pct + '%</span>'
+        + '</div></td>'
+        + '<td><span class="pill ' + bc + '">' + bandLabel(rec.pct) + '</span></td>'
+        + '<td style="color:#6b6b68;font-size:13px">' + fmtDate(rec.date) + '</td>'
+        + '<td><a href="DECA_MTDM_ICDC_Exam_Set' + s + '.html" style="font-size:13px;color:#6b6b68;">Retake →</a></td>'
+        + '</tr>';
+    } else {
+      html += '<tr>'
+        + '<td><a href="DECA_MTDM_ICDC_Exam_Set' + s + '.html">Set ' + s + '</a></td>'
+        + '<td colspan="3"><span class="pill pill-none">Not attempted</span></td>'
+        + '<td><a href="DECA_MTDM_ICDC_Exam_Set' + s + '.html" style="font-size:13px;color:#185FA5;font-weight:600;">Start →</a></td>'
+        + '</tr>';
+    }
+  }
+
+  html += '</tbody></table></div>';
+
+  // CTAs
+  html += '<div class="cta-row">'
+    + '<a href="index.html" class="btn-primary">Practice More Exams →</a>'
+    + '<button id="btn-clear" class="btn-ghost">🗑️ Clear All Progress</button>'
+    + '</div>';
+
+  root.innerHTML = html;
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    if (confirm('Delete all saved scores? This cannot be undone.')) {
+      for (var n = 1; n <= SETS; n++) {
+        localStorage.removeItem('deca_exam_set_' + n);
+      }
+      location.reload();
+    }
+  });
+})();
+</script>
+</body>
+</html>
